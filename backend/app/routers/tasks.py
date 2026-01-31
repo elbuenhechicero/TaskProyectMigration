@@ -12,6 +12,12 @@ from app.models import TaskStatus, Priority
 from app.models.user import UserInDB
 from app.utils.dependencies import get_current_active_user
 
+def convert_datetime_to_date(dt):
+    """Convertir datetime a date para la respuesta de la API"""
+    if dt and isinstance(dt, datetime):
+        return dt.date()
+    return dt
+
 router = APIRouter(prefix="/tasks", tags=["Tasks"])
 
 @router.get("/", response_model=List[TaskResponse])
@@ -56,7 +62,7 @@ async def get_tasks(
     
     # Filtro para tareas vencidas
     if overdue is True:
-        filter_query["due_date"] = {"$lt": datetime.utcnow().date()}
+        filter_query["due_date"] = {"$lt": datetime.utcnow()}
         filter_query["status"] = {"$ne": TaskStatus.COMPLETED}
     
     # Obtener tareas
@@ -87,7 +93,7 @@ async def get_tasks(
         # Verificar si está vencida
         is_overdue = False
         if task_doc.get("due_date") and task_doc["status"] != TaskStatus.COMPLETED:
-            is_overdue = task_doc["due_date"] < datetime.utcnow().date()
+            is_overdue = task_doc["due_date"] < datetime.utcnow()
         
         tasks_response.append(TaskResponse(
             id=str(task_doc["_id"]),
@@ -99,7 +105,7 @@ async def get_tasks(
             project_name=project_name,
             assigned_to=str(task_doc["assigned_to"]) if task_doc.get("assigned_to") else None,
             assigned_username=assigned_username,
-            due_date=task_doc.get("due_date"),
+            due_date=convert_datetime_to_date(task_doc.get("due_date")),
             estimated_hours=task_doc.get("estimated_hours", 0.0),
             actual_hours=task_doc.get("actual_hours", 0.0),
             created_by=str(task_doc["created_by"]),
@@ -147,7 +153,7 @@ async def create_task(
         "priority": task.priority,
         "project_id": task.project_id,
         "assigned_to": task.assigned_to,
-        "due_date": task.due_date,
+        "due_date": datetime.combine(task.due_date, datetime.min.time()) if task.due_date else None,
         "estimated_hours": task.estimated_hours or 0.0,
         "actual_hours": 0.0,
         "created_by": current_user.id,
@@ -236,7 +242,7 @@ async def get_task(
     # Verificar si está vencida
     is_overdue = False
     if task_doc.get("due_date") and task_doc["status"] != TaskStatus.COMPLETED:
-        is_overdue = task_doc["due_date"] < datetime.utcnow().date()
+        is_overdue = task_doc["due_date"] < datetime.utcnow()
     
     return TaskWithDetails(
         id=str(task_doc["_id"]),
@@ -332,7 +338,7 @@ async def update_task(
         update_data["assigned_to"] = task_update.assigned_to
     
     if task_update.due_date is not None:
-        update_data["due_date"] = task_update.due_date
+        update_data["due_date"] = datetime.combine(task_update.due_date, datetime.min.time()) if task_update.due_date else None
     
     if task_update.estimated_hours is not None:
         update_data["estimated_hours"] = task_update.estimated_hours
@@ -367,7 +373,7 @@ async def update_task(
     
     is_overdue = False
     if updated_task.get("due_date") and updated_task["status"] != TaskStatus.COMPLETED:
-        is_overdue = updated_task["due_date"] < datetime.utcnow().date()
+        is_overdue = updated_task["due_date"] < datetime.utcnow()
     
     return TaskResponse(
         id=str(updated_task["_id"]),
@@ -472,7 +478,7 @@ async def get_tasks_stats(
                             {
                                 "$and": [
                                     {"$ne": ["$status", "Completada"]},
-                                    {"$lt": ["$due_date", datetime.utcnow().date()]}
+                                    {"$lt": ["$due_date", datetime.utcnow()]}
                                 ]
                             },
                             1,

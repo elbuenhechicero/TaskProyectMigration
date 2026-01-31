@@ -4,7 +4,10 @@
  */
 class ApiService {
     constructor() {
-        this.baseURL = 'http://localhost:8000'; // Cambiar por URL de Render
+        // Detectar automáticamente si estamos en producción o desarrollo
+        this.baseURL = window.location.hostname === 'localhost' 
+            ? 'http://localhost:8000' 
+            : 'https://taskmanager-api.onrender.com';
         this.token = localStorage.getItem('authToken');
     }
 

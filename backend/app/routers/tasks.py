@@ -11,6 +11,7 @@ from app.models.task import TaskCreate, TaskUpdate, TaskResponse, TaskInDB, Task
 from app.models import TaskStatus, Priority
 from app.models.user import UserInDB
 from app.utils.dependencies import get_current_active_user
+from app.utils.history import HistoryTracker
 
 def convert_datetime_to_date(dt):
     """Convertir datetime a date para la respuesta de la API"""
@@ -163,6 +164,13 @@ async def create_task(
     
     result = await db.tasks.insert_one(task_doc)
     task_doc["_id"] = result.inserted_id
+    
+    # Log creación en historial
+    await HistoryTracker.log_task_created(
+        task_id=result.inserted_id,
+        user_id=current_user.id, 
+        task_title=task.title
+    )
     
     # Obtener nombres para la respuesta
     project_name = None
@@ -352,6 +360,14 @@ async def update_task(
         {"$set": update_data}
     )
     
+    # Log cambios en historial
+    await HistoryTracker.log_task_updated(
+        task_id=ObjectId(task_id),
+        user_id=current_user.id,
+        old_task=existing_task,
+        new_task={**existing_task, **update_data}
+    )
+    
     # Obtener tarea actualizada
     updated_task = await db.tasks.find_one({"_id": ObjectId(task_id)})
     
@@ -425,9 +441,15 @@ async def delete_task(
             detail="Not enough permissions to delete this task"
         )
     
+    # Log eliminación en historial antes de borrar
+    await HistoryTracker.log_task_deleted(
+        task_id=ObjectId(task_id),
+        user_id=current_user.id,
+        task_title=task_doc["title"]
+    )
+    
     # Eliminar comentarios e historial relacionado
     await db.comments.delete_many({"task_id": ObjectId(task_id)})
-    await db.history.delete_many({"task_id": ObjectId(task_id)})
     await db.notifications.delete_many({"task_id": ObjectId(task_id)})
     
     # Eliminar tarea

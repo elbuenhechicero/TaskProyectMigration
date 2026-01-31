@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from app.core.config import settings
 from app.core.database import mongodb
-from app.routers import auth, users, projects, tasks, comments, history, notifications
+from app.routers import auth, users, projects, tasks, comments, history, notifications, dashboard
 
 # Lifecycle events
 @asynccontextmanager
@@ -45,6 +45,7 @@ app.include_router(tasks.router, prefix=settings.api_prefix)
 app.include_router(comments.router, prefix=settings.api_prefix)
 app.include_router(history.router, prefix=settings.api_prefix)
 app.include_router(notifications.router, prefix=settings.api_prefix)
+app.include_router(dashboard.router, prefix=settings.api_prefix)
 
 @app.get("/")
 async def root():

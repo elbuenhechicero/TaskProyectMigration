@@ -8,11 +8,12 @@ from datetime import datetime
 from enum import Enum
 from bson import ObjectId
 
-# Custom ObjectId type for Pydantic
+# Custom ObjectId type for Pydantic v2
 class PyObjectId(ObjectId):
     @classmethod
-    def __get_validators__(cls):
-        yield cls.validate
+    def __get_pydantic_core_schema__(cls, source_type, handler):
+        from pydantic_core import core_schema
+        return core_schema.no_info_plain_validator_function(cls.validate)
 
     @classmethod
     def validate(cls, v):
@@ -23,6 +24,7 @@ class PyObjectId(ObjectId):
     @classmethod
     def __get_pydantic_json_schema__(cls, field_schema):
         field_schema.update(type="string")
+        return field_schema
 
 # Enums para estados y prioridades
 class TaskStatus(str, Enum):

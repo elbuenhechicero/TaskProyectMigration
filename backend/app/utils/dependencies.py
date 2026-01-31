@@ -24,21 +24,38 @@ async def get_current_user(
     )
     
     try:
-        # Verificar token
-        username = verify_token(credentials.credentials)
+        # El token viene sin el prefijo "Bearer " desde HTTPAuthorizationCredentials
+        token = credentials.credentials
+        print(f"Token length: {len(token)}")
+        print(f"Token starts with: {token[:30]}")
+        print(f"Token ends with: {token[-30:]}")
+        
+        # Verificar token (ya no incluye "Bearer ")
+        username = verify_token(token)
+        print(f"Username from token: {username}")
+        
         if username is None:
+            print("Token verification failed: username is None")
             raise credentials_exception
         
         # Buscar usuario en la base de datos
         user_doc = await db.users.find_one({"username": username})
+        print(f"User found in DB: {user_doc is not None}")
+        
         if user_doc is None:
+            print(f"User '{username}' not found in database")
             raise credentials_exception
             
         # Convertir documento a modelo Pydantic
         user = UserInDB(**user_doc)
+        print(f"User object created successfully: {user.username}")
         return user
         
+    except HTTPException:
+        raise
     except Exception as e:
+        print(f"Unexpected error in get_current_user: {e}")
+        print(f"Error type: {type(e)}")
         raise credentials_exception
 
 async def get_current_active_user(

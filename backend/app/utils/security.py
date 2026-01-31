@@ -15,7 +15,10 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
 
 def get_password_hash(password: str) -> str:
-    """Generar hash de password"""
+    """Generar hash de password con manejo de longitud"""
+    # Truncar password si es muy largo (bcrypt limit)
+    if len(password.encode('utf-8')) > 72:
+        password = password[:72]
     return pwd_context.hash(password)
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
@@ -33,12 +36,31 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
 def verify_token(token: str) -> Optional[str]:
     """Verificar token JWT y obtener username"""
     try:
+        # Asegurarse de que no tenga el prefijo "Bearer "
+        if token.startswith("Bearer "):
+            token = token[7:]  # Remover "Bearer "
+            
+        print(f"Clean token length: {len(token)}")
+        print(f"Clean token starts: {token[:50]}")
+        print(f"Using SECRET_KEY: {settings.secret_key[:20]}...")
+        print(f"Algorithm: {settings.algorithm}")
+        
         payload = jwt.decode(token, settings.secret_key, algorithms=[settings.algorithm])
         username: str = payload.get("sub")
+        
+        print(f"Token payload: {payload}")
+        print(f"Extracted username: {username}")
+        
         if username is None:
+            print("Username is None in payload")
             return None
         return username
-    except JWTError:
+    except JWTError as e:
+        print(f"JWT Error: {e}")
+        print(f"JWT Error type: {type(e)}")
+        return None
+    except Exception as e:
+        print(f"Unexpected error in verify_token: {e}")
         return None
 
 def decode_token(token: str) -> Optional[dict]:

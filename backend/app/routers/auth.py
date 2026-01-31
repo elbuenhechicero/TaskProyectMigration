@@ -16,53 +16,65 @@ router = APIRouter(prefix="/auth", tags=["Authentication"])
 @router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 async def register(user: UserCreate, db = Depends(get_database)):
     """Registrar nuevo usuario"""
-    # Verificar si el usuario ya existe
-    existing_user = await db.users.find_one({
-        "$or": [
-            {"username": user.username},
-            {"email": user.email}
-        ]
-    })
-    
-    if existing_user:
-        if existing_user["username"] == user.username:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Username already registered"
-            )
-        else:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Email already registered"
-            )
-    
-    # Crear usuario
-    hashed_password = get_password_hash(user.password)
-    user_doc = {
-        "username": user.username,
-        "email": user.email,
-        "hashed_password": hashed_password,
-        "full_name": user.full_name,
-        "is_active": user.is_active,
-        "is_admin": user.is_admin,
-        "created_at": datetime.utcnow(),
-        "updated_at": datetime.utcnow(),
-        "last_login": None
-    }
-    
-    result = await db.users.insert_one(user_doc)
-    user_doc["_id"] = result.inserted_id
-    
-    # Convertir a modelo de respuesta
-    return UserResponse(
-        id=str(result.inserted_id),
-        username=user.username,
-        email=user.email,
-        full_name=user.full_name,
-        is_active=user.is_active,
-        is_admin=user.is_admin,
-        created_at=user_doc["created_at"]
-    )
+    try:
+        # Verificar si el usuario ya existe
+        existing_user = await db.users.find_one({
+            "$or": [
+                {"username": user.username},
+                {"email": user.email}
+            ]
+        })
+        
+        if existing_user:
+            if existing_user["username"] == user.username:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Username already registered"
+                )
+            else:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Email already registered"
+                )
+        
+        # Crear usuario
+        hashed_password = get_password_hash(user.password)
+        user_doc = {
+            "username": user.username,
+            "email": user.email,
+            "hashed_password": hashed_password,
+            "full_name": user.full_name,
+            "is_active": user.is_active,
+            "is_admin": user.is_admin,
+            "created_at": datetime.utcnow(),
+            "updated_at": datetime.utcnow(),
+            "last_login": None
+        }
+        
+        result = await db.users.insert_one(user_doc)
+        user_doc["_id"] = result.inserted_id
+        
+        # Convertir a modelo de respuesta
+        return UserResponse(
+            id=str(result.inserted_id),
+            username=user.username,
+            email=user.email,
+            full_name=user.full_name,
+            is_active=user.is_active,
+            is_admin=user.is_admin,
+            created_at=user_doc["created_at"]
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        # Log del error real
+        print(f"Error creating user: {str(e)}")
+        print(f"Error type: {type(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Database error: {str(e)}"
+        )
 
 @router.post("/login", response_model=Token)
 async def login(user: UserLogin, db = Depends(get_database)):

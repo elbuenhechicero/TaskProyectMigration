@@ -31,13 +31,10 @@ services:
         value: '["https://taskmanager-frontend.onrender.com", "http://localhost:3000"]'
 
   # Frontend (Static Site)
-  - type: web
+  - type: static
     name: taskmanager-frontend
-    env: static
-    plan: free
-    rootDir: frontend
-    buildCommand: echo "No build needed for static files"
-    staticPublishPath: .
+    buildCommand: echo "No build needed"
+    staticPublishPath: frontend
     headers:
       - path: /*
         name: Cache-Control

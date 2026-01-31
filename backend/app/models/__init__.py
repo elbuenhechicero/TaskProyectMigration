@@ -1,0 +1,58 @@
+"""
+Modelos Pydantic para el sistema de gestión de tareas
+Basados en el sistema legacy JavaScript
+"""
+from pydantic import BaseModel, Field, ConfigDict
+from typing import Optional, List
+from datetime import datetime
+from enum import Enum
+from bson import ObjectId
+
+# Custom ObjectId type for Pydantic
+class PyObjectId(ObjectId):
+    @classmethod
+    def __get_validators__(cls):
+        yield cls.validate
+
+    @classmethod
+    def validate(cls, v):
+        if not ObjectId.is_valid(v):
+            raise ValueError("Invalid ObjectId")
+        return ObjectId(v)
+
+    @classmethod
+    def __get_pydantic_json_schema__(cls, field_schema):
+        field_schema.update(type="string")
+
+# Enums para estados y prioridades
+class TaskStatus(str, Enum):
+    PENDING = "Pendiente"
+    IN_PROGRESS = "En Progreso" 
+    COMPLETED = "Completada"
+    BLOCKED = "Bloqueada"
+    CANCELLED = "Cancelada"
+
+class Priority(str, Enum):
+    LOW = "Baja"
+    MEDIUM = "Media"
+    HIGH = "Alta"
+    CRITICAL = "Crítica"
+
+class ActionType(str, Enum):
+    CREATED = "CREATED"
+    UPDATED = "UPDATED"
+    STATUS_CHANGED = "STATUS_CHANGED"
+    ASSIGNED = "ASSIGNED"
+    DELETED = "DELETED"
+
+# Base model with common fields
+class BaseDocument(BaseModel):
+    id: Optional[PyObjectId] = Field(default_factory=PyObjectId, alias="_id")
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    
+    model_config = ConfigDict(
+        populate_by_name=True,
+        arbitrary_types_allowed=True,
+        json_encoders={ObjectId: str}
+    )

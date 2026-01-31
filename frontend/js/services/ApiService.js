@@ -7,7 +7,7 @@ class ApiService {
         // Detectar automáticamente si estamos en producción o desarrollo
         this.baseURL = window.location.hostname === 'localhost' 
             ? 'http://localhost:8000' 
-            : 'https://taskmanager-api.onrender.com';
+            : 'https://taskmanager-api-id17.onrender.com';
         this.token = localStorage.getItem('authToken');
     }
 

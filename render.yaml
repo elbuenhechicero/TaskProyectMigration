@@ -34,7 +34,6 @@ services:
   - type: web
     name: taskmanager-frontend
     env: static
-    region: oregon
     plan: free
     rootDir: frontend
     buildCommand: echo "No build needed for static files"

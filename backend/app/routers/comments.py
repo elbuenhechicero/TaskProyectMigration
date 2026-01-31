@@ -1,6 +1,6 @@
 """
 Router para gestión de comentarios
-Sistema de colaboración en tareas
+Sistema de colaboración en tareas con notificaciones de menciones
 """
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from typing import List, Optional
@@ -11,6 +11,7 @@ from app.core.database import get_database
 from app.models.comment import CommentCreate, CommentUpdate, CommentResponse, CommentWithTask
 from app.models.user import UserInDB
 from app.utils.dependencies import get_current_active_user
+from app.utils.notification_service import NotificationService
 
 router = APIRouter(prefix="/comments", tags=["Comments"])
 
@@ -116,6 +117,16 @@ async def create_comment(
     
     result = await db.comments.insert_one(comment_doc)
     comment_doc["_id"] = result.inserted_id
+    
+    # Notificar menciones
+    if mention_usernames:
+        notification_service = NotificationService(db)
+        await notification_service.notify_comment_mention(
+            comment_id=result.inserted_id,
+            task=task,
+            mentioned_users=mention_usernames,
+            author_user_id=current_user.id
+        )
     
     return CommentResponse(
         id=str(result.inserted_id),

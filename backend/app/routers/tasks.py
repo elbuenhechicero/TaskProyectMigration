@@ -1,6 +1,6 @@
 """
 Router para gestión de tareas (CRUD completo)
-El core del sistema de gestión de tareas
+El core del sistema de gestión de tareas con notificaciones automáticas
 """
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from typing import List, Optional
@@ -12,6 +12,7 @@ from app.models import TaskStatus, Priority
 from app.models.user import UserInDB
 from app.utils.dependencies import get_current_active_user
 from app.utils.history import HistoryTracker
+from app.utils.notification_service import NotificationService
 
 def convert_datetime_to_date(dt):
     """Convertir datetime a date para la respuesta de la API"""
@@ -171,6 +172,14 @@ async def create_task(
         user_id=current_user.id, 
         task_title=task.title
     )
+    
+    # Notificar asignación de tarea si hay un usuario asignado
+    if task.assigned_to:
+        notification_service = NotificationService(db)
+        await notification_service.notify_task_assigned(
+            task=task_doc,
+            assigned_by_user_id=current_user.id
+        )
     
     # Obtener nombres para la respuesta
     project_name = None
@@ -368,8 +377,48 @@ async def update_task(
         new_task={**existing_task, **update_data}
     )
     
-    # Obtener tarea actualizada
+    # Obtener tarea actualizada para notificaciones
     updated_task = await db.tasks.find_one({"_id": ObjectId(task_id)})
+    
+    # Notificar cambios en la tarea
+    notification_service = NotificationService(db)
+    
+    # Verificar cambios importantes para notificar
+    changes = []
+    if task_update.assigned_to is not None and task_update.assigned_to != existing_task.get("assigned_to"):
+        # Nueva asignación
+        if task_update.assigned_to:
+            await notification_service.notify_task_assigned(
+                task=updated_task,
+                assigned_by_user_id=current_user.id
+            )
+        changes.append("asignación")
+    
+    if task_update.status is not None and task_update.status != existing_task.get("status"):
+        changes.append("estado")
+        # Notificar finalización
+        if task_update.status == TaskStatus.COMPLETED:
+            await notification_service.notify_task_completed(
+                task=updated_task,
+                completed_by_user_id=current_user.id
+            )
+    
+    if task_update.priority is not None and task_update.priority != existing_task.get("priority"):
+        changes.append("prioridad")
+    
+    if task_update.due_date is not None and task_update.due_date != convert_datetime_to_date(existing_task.get("due_date")):
+        changes.append("fecha límite")
+        
+    if task_update.title is not None and task_update.title != existing_task.get("title"):
+        changes.append("título")
+    
+    # Notificar actualizaciones si hay cambios importantes
+    if changes:
+        await notification_service.notify_task_updated(
+            task=updated_task,
+            updated_by_user_id=current_user.id,
+            changes=changes
+        )
     
     # Obtener datos relacionados para la respuesta
     project_name = None

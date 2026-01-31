@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from app.core.config import settings
 from app.core.database import mongodb
-from app.routers import auth, users, projects
+from app.routers import auth, users, projects, tasks
 
 # Lifecycle events
 @asynccontextmanager
@@ -41,6 +41,7 @@ app.add_middleware(
 app.include_router(auth.router, prefix=settings.api_prefix)
 app.include_router(users.router, prefix=settings.api_prefix)
 app.include_router(projects.router, prefix=settings.api_prefix)
+app.include_router(tasks.router, prefix=settings.api_prefix)
 
 @app.get("/")
 async def root():

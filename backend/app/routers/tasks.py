@@ -13,6 +13,7 @@ from app.models.user import UserInDB
 from app.utils.dependencies import get_current_active_user
 from app.utils.history import HistoryTracker
 from app.utils.notification_service import NotificationService
+from app.utils.cache import CacheInvalidationService
 
 def convert_datetime_to_date(dt):
     """Convertir datetime a date para la respuesta de la API"""
@@ -180,6 +181,12 @@ async def create_task(
             task=task_doc,
             assigned_by_user_id=current_user.id
         )
+    
+    # Invalidar caché relacionado
+    CacheInvalidationService.invalidate_task_caches(
+        task_id=str(result.inserted_id),
+        project_id=str(task.project_id) if task.project_id else None
+    )
     
     # Obtener nombres para la respuesta
     project_name = None
@@ -419,13 +426,12 @@ async def update_task(
             updated_by_user_id=current_user.id,
             changes=changes
         )
-    
-    # Obtener datos relacionados para la respuesta
-    project_name = None
-    if updated_task.get("project_id"):
-        project = await db.projects.find_one({"_id": updated_task["project_id"]})
-        project_name = project["name"] if project else None
-    
+        
+        # Invalidar caché relacionado
+        CacheInvalidationService.invalidate_task_caches(
+            task_id=task_id,
+            project_id=str(updated_task["project_id"]) if updated_task.get("project_id") else None
+        )
     assigned_username = None
     if updated_task.get("assigned_to"):
         user = await db.users.find_one({"_id": updated_task["assigned_to"]})

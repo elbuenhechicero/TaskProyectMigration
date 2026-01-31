@@ -17,10 +17,12 @@ from app.models.dashboard import (
 from app.models.user import UserInDB
 from app.utils.dependencies import get_current_active_user
 from app.utils.reports_service import ReportsService
+from app.utils.cache import cache_response, CacheConfig
 
 router = APIRouter(prefix="/dashboard", tags=["Dashboard & Reports"])
 
 @router.get("/summary", response_model=DashboardSummary)
+@cache_response(ttl=CacheConfig.TTL_DASHBOARD, prefix="dashboard_summary")
 async def get_dashboard_summary(
     time_range: TimeRange = Query(TimeRange.LAST_30_DAYS, description="Rango de tiempo para las estadísticas"),
     current_user: UserInDB = Depends(get_current_active_user),
@@ -34,6 +36,7 @@ async def get_dashboard_summary(
     return summary
 
 @router.get("/stats/tasks", response_model=TaskStatistics)
+@cache_response(ttl=CacheConfig.TTL_STATS, prefix="task_stats")
 async def get_task_statistics(
     time_range: TimeRange = Query(TimeRange.LAST_30_DAYS, description="Rango de tiempo"),
     project_id: Optional[str] = Query(None, description="Filtrar por proyecto específico"),
@@ -48,6 +51,7 @@ async def get_task_statistics(
     return stats
 
 @router.get("/stats/projects", response_model=ProjectStatistics)
+@cache_response(ttl=CacheConfig.TTL_STATS, prefix="project_stats")
 async def get_project_statistics(
     time_range: TimeRange = Query(TimeRange.LAST_30_DAYS, description="Rango de tiempo"),
     current_user: UserInDB = Depends(get_current_active_user),

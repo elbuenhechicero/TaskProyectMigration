@@ -1,0 +1,37 @@
+<div id="searchTab" class="tab-content hidden">
+  <h2 class="page-title">Búsqueda Avanzada</h2>
+  <div class="flex flex-wrap gap-3 mb-6">
+    <input type="text" id="searchText" placeholder="Buscar en título y descripción..." class="input flex-1 min-w-[200px] max-w-xs">
+    <select id="searchStatus" class="input w-36">
+      <option value="">Todos los estados</option>
+      <option>Pendiente</option>
+      <option>En Progreso</option>
+      <option>Completada</option>
+    </select>
+    <select id="searchPriority" class="input w-36">
+      <option value="">Todas</option>
+      <option>Baja</option>
+      <option>Media</option>
+      <option>Alta</option>
+      <option>Crítica</option>
+    </select>
+    <select id="searchProject" class="input w-48">
+      <option value="0">Todos los proyectos</option>
+    </select>
+    <button type="button" id="searchBtn" class="btn btn-primary">Buscar</button>
+  </div>
+  <div class="table-wrapper">
+    <table class="w-full">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Título</th>
+          <th>Estado</th>
+          <th>Prioridad</th>
+          <th>Proyecto</th>
+        </tr>
+      </thead>
+      <tbody id="searchTableBody"></tbody>
+    </table>
+  </div>
+</div>

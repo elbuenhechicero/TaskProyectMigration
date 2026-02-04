@@ -1,0 +1,85 @@
+<div id="tasksTab" class="tab-content hidden">
+  <h2 class="page-title">Gestión de Tareas</h2>
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <section class="card-muted">
+      <h3 class="section-title">Nueva / Editar Tarea</h3>
+      <form id="taskForm" class="space-y-4">
+        <div>
+          <label for="taskTitle" class="block text-sm font-medium text-slate-700">Título *</label>
+          <input type="text" id="taskTitle" required class="input w-full">
+        </div>
+        <div>
+          <label for="taskDescription" class="block text-sm font-medium text-slate-700">Descripción</label>
+          <textarea id="taskDescription" rows="3" class="input w-full"></textarea>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label for="taskStatus" class="block text-sm font-medium text-slate-700">Estado</label>
+            <select id="taskStatus" class="input w-full">
+              <option>Pendiente</option>
+              <option>En Progreso</option>
+              <option>Completada</option>
+              <option>Bloqueada</option>
+              <option>Cancelada</option>
+            </select>
+          </div>
+          <div>
+            <label for="taskPriority" class="block text-sm font-medium text-slate-700">Prioridad</label>
+            <select id="taskPriority" class="input w-full">
+              <option>Baja</option>
+              <option selected>Media</option>
+              <option>Alta</option>
+              <option>Crítica</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label for="taskProject" class="block text-sm font-medium text-slate-700">Proyecto</label>
+            <select id="taskProject" class="input w-full"></select>
+          </div>
+          <div>
+            <label for="taskAssigned" class="block text-sm font-medium text-slate-700">Asignado a</label>
+            <select id="taskAssigned" class="input w-full"></select>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label for="taskDueDate" class="block text-sm font-medium text-slate-700">Fecha vencimiento</label>
+            <input type="date" id="taskDueDate" class="input w-full">
+          </div>
+          <div>
+            <label for="taskHours" class="block text-sm font-medium text-slate-700">Horas estimadas</label>
+            <input type="number" id="taskHours" min="0" step="0.5" class="input w-full">
+          </div>
+        </div>
+        <div class="flex flex-wrap gap-2 pt-1">
+          <button type="submit" name="add" class="btn btn-primary">Agregar</button>
+          <button type="button" name="update" class="btn btn-secondary">Actualizar</button>
+          <button type="button" name="delete" class="btn btn-danger">Eliminar</button>
+          <button type="button" name="clear" class="btn btn-outline">Limpiar</button>
+        </div>
+      </form>
+    </section>
+    <section>
+      <h3 class="section-title">Lista de Tareas</h3>
+      <div class="table-wrapper">
+        <table class="w-full">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Título</th>
+              <th>Estado</th>
+              <th>Prioridad</th>
+              <th>Proyecto</th>
+              <th>Asignado</th>
+              <th>Vencimiento</th>
+            </tr>
+          </thead>
+          <tbody id="tasksTableBody"></tbody>
+        </table>
+      </div>
+      <p id="statsText" class="stats-bar"></p>
+    </section>
+  </div>
+</div>

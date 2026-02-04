@@ -1,0 +1,25 @@
+<div id="commentsTab" class="tab-content hidden">
+  <h2 class="page-title">Comentarios de Tareas</h2>
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <section class="card-muted">
+      <div class="space-y-3">
+        <div>
+          <label for="commentTaskId" class="block text-sm font-medium text-slate-700">Tarea</label>
+          <select id="commentTaskId" class="input w-full"></select>
+        </div>
+        <div>
+          <label for="commentText" class="block text-sm font-medium text-slate-700">Comentario</label>
+          <textarea id="commentText" rows="3" class="input w-full"></textarea>
+        </div>
+        <div class="flex gap-2">
+          <button type="button" id="addCommentBtn" class="btn btn-primary">Agregar Comentario</button>
+          <button type="button" id="loadCommentsBtn" class="btn btn-outline">Cargar Comentarios</button>
+        </div>
+      </div>
+    </section>
+    <section>
+      <h3 class="section-title">Comentarios</h3>
+      <textarea id="commentsArea" rows="15" readonly class="readonly-area"></textarea>
+    </section>
+  </div>
+</div>

@@ -1,170 +1,52 @@
-/**
- * ApiService - Servicio base para comunicación con la API
- * Maneja autenticación, peticiones HTTP y manejo de errores
- */
-class ApiService {
-    constructor() {
-        // Detectar automáticamente si estamos en producción o desarrollo
-        this.baseURL = window.location.hostname === 'localhost' 
-            ? 'http://localhost:8000' 
-            : 'https://taskmanager-api-id17.onrender.com';
-        this.token = localStorage.getItem('authToken');
+const ApiService = {
+  getToken() {
+    return localStorage.getItem("token");
+  },
+
+  setToken(token) {
+    if (token) localStorage.setItem("token", token);
+    else localStorage.removeItem("token");
+  },
+
+  async request(path, options = {}) {
+    const url = `${Config.API_BASE_URL}${path}`;
+    const headers = {
+      "Content-Type": "application/json",
+      ...options.headers,
+    };
+    const token = this.getToken();
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+
+    const res = await fetch(url, { ...options, headers });
+    const data = await res.json().catch(() => ({}));
+
+    if (res.status === 401) {
+      this.setToken(null);
+      if (typeof window.App !== "undefined" && window.App.onUnauthorized) {
+        window.App.onUnauthorized();
+      }
+      throw new Error("Sesión expirada");
     }
 
-    /**
-     * Configurar el token de autenticación
-     */
-    setAuthToken(token) {
-        this.token = token;
-        if (token) {
-            localStorage.setItem('authToken', token);
-        } else {
-            localStorage.removeItem('authToken');
-        }
+    if (!res.ok) {
+      throw new Error(data.error || `Error ${res.status}`);
     }
+    return data;
+  },
 
-    /**
-     * Obtener headers por defecto
-     */
-    getHeaders(includeAuth = true) {
-        const headers = {
-            'Content-Type': 'application/json'
-        };
+  get(path) {
+    return this.request(path, { method: "GET" });
+  },
 
-        if (includeAuth && this.token) {
-            headers['Authorization'] = `Bearer ${this.token}`;
-        }
+  post(path, body) {
+    return this.request(path, { method: "POST", body: JSON.stringify(body || {}) });
+  },
 
-        return headers;
-    }
+  put(path, body) {
+    return this.request(path, { method: "PUT", body: JSON.stringify(body || {}) });
+  },
 
-    /**
-     * Hacer petición HTTP genérica
-     */
-    async request(method, endpoint, data = null, includeAuth = true) {
-        try {
-            const config = {
-                method: method.toUpperCase(),
-                headers: this.getHeaders(includeAuth)
-            };
-
-            if (data && ['POST', 'PUT', 'PATCH'].includes(config.method)) {
-                config.body = JSON.stringify(data);
-            }
-
-            const response = await fetch(`${this.baseURL}${endpoint}`, config);
-            
-            // Manejar errores HTTP
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new ApiError(
-                    errorData.message || `HTTP ${response.status}`,
-                    response.status,
-                    errorData
-                );
-            }
-
-            // Intentar parsear JSON, si no es posible, devolver texto
-            try {
-                return await response.json();
-            } catch {
-                return await response.text();
-            }
-
-        } catch (error) {
-            console.error(`API Request Error [${method.toUpperCase()} ${endpoint}]:`, error);
-            
-            // Si no hay conexión a internet
-            if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
-                throw new ApiError('No se pudo conectar con el servidor. Verifique su conexión a internet.', 0);
-            }
-            
-            // Re-lanzar errores conocidos
-            if (error instanceof ApiError) {
-                throw error;
-            }
-            
-            // Error desconocido
-            throw new ApiError('Error inesperado al comunicarse con el servidor', 500, error);
-        }
-    }
-
-    /**
-     * Métodos HTTP específicos
-     */
-    async get(endpoint, includeAuth = true) {
-        return this.request('GET', endpoint, null, includeAuth);
-    }
-
-    async post(endpoint, data, includeAuth = true) {
-        return this.request('POST', endpoint, data, includeAuth);
-    }
-
-    async put(endpoint, data, includeAuth = true) {
-        return this.request('PUT', endpoint, data, includeAuth);
-    }
-
-    async patch(endpoint, data, includeAuth = true) {
-        return this.request('PATCH', endpoint, data, includeAuth);
-    }
-
-    async delete(endpoint, includeAuth = true) {
-        return this.request('DELETE', endpoint, null, includeAuth);
-    }
-
-    /**
-     * Verificar si el token es válido
-     */
-    async validateToken() {
-        try {
-            await this.get('/api/v1/auth/validate');
-            return true;
-        } catch (error) {
-            if (error.status === 401) {
-                this.setAuthToken(null);
-                return false;
-            }
-            throw error;
-        }
-    }
-
-    /**
-     * Método para manejar logout
-     */
-    logout() {
-        this.setAuthToken(null);
-    }
-}
-
-/**
- * Clase personalizada para errores de API
- */
-class ApiError extends Error {
-    constructor(message, status = 500, details = null) {
-        super(message);
-        this.name = 'ApiError';
-        this.status = status;
-        this.details = details;
-    }
-
-    /**
-     * Verificar si es un error de autenticación
-     */
-    isAuthError() {
-        return this.status === 401;
-    }
-
-    /**
-     * Verificar si es un error de validación
-     */
-    isValidationError() {
-        return this.status === 400 || this.status === 422;
-    }
-
-    /**
-     * Verificar si es un error del servidor
-     */
-    isServerError() {
-        return this.status >= 500;
-    }
-}
+  delete(path) {
+    return this.request(path, { method: "DELETE" });
+  },
+};

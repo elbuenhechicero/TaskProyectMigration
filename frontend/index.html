@@ -1,206 +1,117 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Task Manager - Sistema de Gestión Profesional</title>
-    
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Alpine.js -->
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="css/main.css">
-    
-    <!-- Configuración de Tailwind -->
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: {
-                            50: '#eff6ff',
-                            500: '#3b82f6',
-                            600: '#2563eb',
-                            700: '#1d4ed8',
-                            900: '#1e3a8a'
-                        }
-                    }
-                }
-            }
-        }
-    </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Task Manager</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/main.css">
 </head>
-<body class="bg-gray-50 font-sans antialiased">
-    <!-- Loading Screen -->
-    <div id="loadingScreen" class="fixed inset-0 bg-white z-50 flex items-center justify-center">
-        <div class="text-center">
-            <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <h2 class="text-xl font-semibold text-gray-700">Cargando Task Manager...</h2>
-            <p class="text-gray-500 mt-2">Inicializando aplicación</p>
+<body class="antialiased app-body">
+  <!-- Pantalla de Login (full screen, centrada) -->
+  <div id="loginPanel" class="login-screen">
+    <div class="login-screen-bg"></div>
+    <div class="login-panel-wrapper"></div>
+  </div>
+
+  <!-- App principal: sidebar + contenido -->
+  <div id="mainPanel" class="app-layout hidden">
+    <!-- Sidebar estilo Discord/Facebook -->
+    <aside class="app-sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">
+          <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
         </div>
-    </div>
+        <span class="sidebar-title">Task Manager</span>
+      </div>
+      <nav class="sidebar-nav">
+        <button type="button" data-tab="tasks" class="tab-button sidebar-item active">
+          <svg class="sidebar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+          <span>Tareas</span>
+        </button>
+        <button type="button" data-tab="projects" class="tab-button sidebar-item">
+          <svg class="sidebar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
+          <span>Proyectos</span>
+        </button>
+        <button type="button" data-tab="comments" class="tab-button sidebar-item">
+          <svg class="sidebar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+          <span>Comentarios</span>
+        </button>
+        <button type="button" data-tab="history" class="tab-button sidebar-item">
+          <svg class="sidebar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          <span>Historial</span>
+        </button>
+        <button type="button" data-tab="notifications" class="tab-button sidebar-item">
+          <svg class="sidebar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+          <span>Notificaciones</span>
+        </button>
+        <button type="button" data-tab="search" class="tab-button sidebar-item">
+          <svg class="sidebar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          <span>Búsqueda</span>
+        </button>
+        <button type="button" data-tab="reports" class="tab-button sidebar-item">
+          <svg class="sidebar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+          <span>Reportes</span>
+        </button>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="sidebar-user-avatar" id="sidebarUserAvatar"></div>
+          <div class="sidebar-user-info">
+            <span class="sidebar-user-name" id="sidebarUserName"></span>
+            <span class="sidebar-user-status">En línea</span>
+          </div>
+        </div>
+        <button type="button" id="logoutBtn" class="sidebar-logout">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+          <span>Salir</span>
+        </button>
+      </div>
+    </aside>
+    <!-- Área principal: top bar + contenido -->
+    <main class="app-main">
+      <header class="app-topbar">
+        <h1 class="app-topbar-title" id="currentSectionTitle">Tareas</h1>
+        <div class="app-topbar-user">
+          <div class="topbar-avatar" id="topbarUserAvatar"></div>
+          <span class="topbar-username" id="currentUser"></span>
+        </div>
+      </header>
+      <div class="app-content">
+        <div id="tabContentContainer"></div>
+      </div>
+    </main>
+  </div>
 
-    <!-- Login Container -->
-    <div id="loginContainer" class="hidden">
-        <!-- El contenido se genera dinámicamente en LoginView -->
-    </div>
-
-    <!-- Main App Container -->
-    <div id="appContainer" class="hidden min-h-screen bg-gray-50">
-        <!-- Navigation Sidebar -->
-        <nav id="sidebar" class="fixed left-0 top-0 h-full w-64 bg-white shadow-xl z-40 transform transition-transform duration-300 ease-in-out">
-            <!-- Sidebar content will be generated dynamically -->
-        </nav>
-
-        <!-- Mobile Menu Overlay -->
-        <div id="mobileOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden hidden"></div>
-
-        <!-- Main Content Area -->
-        <main id="mainContent" class="lg:ml-64 min-h-screen">
-            <!-- Top Header -->
-            <header id="topHeader" class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-20">
-                <!-- Header content will be generated dynamically -->
-            </header>
-
-            <!-- Page Content Container -->
-            <div id="pageContent" class="p-6">
-                <!-- Dynamic content will be loaded here -->
-            </div>
-        </main>
-    </div>
-
-    <!-- Toast Notifications Container -->
-    <div id="toastContainer" class="fixed top-4 right-4 z-50 space-y-2">
-        <!-- Toast notifications will be added here dynamically -->
-    </div>
-
-    <!-- Modal Container -->
-    <div id="modalContainer">
-        <!-- Modals will be rendered here dynamically -->
-    </div>
-
-    <!-- Global Error Handler -->
-    <div id="globalErrorContainer" class="fixed bottom-4 left-4 z-50">
-        <!-- Global errors will be displayed here -->
-    </div>
-
-    <!-- Scripts - Load in correct order -->
-    
-    <!-- Models -->
-    <script src="js/models/BaseModel.js"></script>
-    <script src="js/models/User.js"></script>
-    <script src="js/models/Task.js"></script>
-    <script src="js/models/Project.js"></script>
-
-    <!-- Services -->
-    <script src="js/services/ApiService.js"></script>
-    <script src="js/services/AuthService.js"></script>
-    <script src="js/services/TaskService.js"></script>
-    <script src="js/services/ProjectService.js"></script>
-
-    <!-- Views -->
-    <script src="js/views/BaseView.js"></script>
-    <script src="js/views/LoginView.js"></script>
-    <script src="js/views/DashboardView.js"></script>
-    <script src="js/views/TaskView.js"></script>
-    <script src="js/views/ProjectView.js"></script>
-    <script src="js/views/ProfileView.js"></script>
-
-    <!-- Controllers -->
-    <script src="js/controllers/AppController.js"></script>
-    <script src="js/controllers/TaskController.js"></script>
-    <script src="js/controllers/ProjectController.js"></script>
-
-    <!-- Utils -->
-    <script src="js/utils/Toast.js"></script>
-    <script src="js/utils/ValidationHelper.js"></script>
-    <script src="js/utils/DateHelper.js"></script>
-
-    <!-- Main App Initialization -->
-    <script>
-        // Global error handler
-        window.addEventListener('error', function(e) {
-            console.error('Global error:', e.error);
-            if (window.app && typeof window.app.handleGlobalError === 'function') {
-                window.app.handleGlobalError(e.error);
-            }
-        });
-
-        // Unhandled promise rejections
-        window.addEventListener('unhandledrejection', function(e) {
-            console.error('Unhandled promise rejection:', e.reason);
-            if (window.app && typeof window.app.handleGlobalError === 'function') {
-                window.app.handleGlobalError(e.reason);
-            }
-        });
-
-        // Initialize app when DOM is loaded
-        document.addEventListener('DOMContentLoaded', function() {
-            // Hide loading screen after a short delay
-            setTimeout(() => {
-                const loadingScreen = document.getElementById('loadingScreen');
-                if (loadingScreen) {
-                    loadingScreen.style.display = 'none';
-                }
-                
-                // Initialize main app controller
-                try {
-                    window.app = new AppController();
-                    console.log('Task Manager initialized successfully');
-                } catch (error) {
-                    console.error('Failed to initialize app:', error);
-                    // Show basic error message
-                    document.body.innerHTML = `
-                        <div class="min-h-screen bg-red-50 flex items-center justify-center">
-                            <div class="bg-white p-8 rounded-lg shadow-lg max-w-md">
-                                <div class="text-center">
-                                    <i class="fas fa-exclamation-triangle text-4xl text-red-500 mb-4"></i>
-                                    <h1 class="text-xl font-bold text-gray-800 mb-2">Error de Inicialización</h1>
-                                    <p class="text-gray-600 mb-4">No se pudo inicializar la aplicación.</p>
-                                    <button onclick="location.reload()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                                        Reintentar
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                }
-            }, 1000);
-        });
-
-        // Service Worker registration (opcional)
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', function() {
-                navigator.serviceWorker.register('/sw.js')
-                    .then(function(registration) {
-                        console.log('ServiceWorker registered successfully');
-                    })
-                    .catch(function(registrationError) {
-                        console.log('ServiceWorker registration failed: ', registrationError);
-                    });
-            });
-        }
-    </script>
-
-    <!-- Performance monitoring (opcional) -->
-    <script>
-        // Monitor performance metrics
-        window.addEventListener('load', function() {
-            if ('performance' in window) {
-                const perfData = performance.getEntriesByType('navigation')[0];
-                console.log('Page load performance:', {
-                    domContentLoaded: perfData.domContentLoadedEventEnd - perfData.domContentLoadedEventStart,
-                    loadComplete: perfData.loadEventEnd - perfData.loadEventStart,
-                    totalTime: perfData.loadEventEnd - perfData.navigationStart
-                });
-            }
-        });
-    </script>
+  <script src="js/config.js"></script>
+  <script src="js/utils/escape.js"></script>
+  <script src="js/utils/toast.js"></script>
+  <script src="js/services/ApiService.js"></script>
+  <script src="js/services/AuthService.js"></script>
+  <script src="js/services/ViewLoader.js"></script>
+  <script src="js/services/TaskService.js"></script>
+  <script src="js/services/ProjectService.js"></script>
+  <script src="js/services/CommentService.js"></script>
+  <script src="js/services/HistoryService.js"></script>
+  <script src="js/services/NotificationService.js"></script>
+  <script src="js/services/ReportService.js"></script>
+  <script src="js/views/LoginView.js"></script>
+  <script src="js/views/TaskView.js"></script>
+  <script src="js/views/ProjectView.js"></script>
+  <script src="js/views/CommentView.js"></script>
+  <script src="js/views/HistoryView.js"></script>
+  <script src="js/views/NotificationView.js"></script>
+  <script src="js/views/SearchView.js"></script>
+  <script src="js/views/ReportView.js"></script>
+  <script src="js/controllers/AuthController.js"></script>
+  <script src="js/controllers/TabController.js"></script>
+  <script src="js/controllers/TaskController.js"></script>
+  <script src="js/controllers/ProjectController.js"></script>
+  <script src="js/controllers/CommentController.js"></script>
+  <script src="js/controllers/HistoryController.js"></script>
+  <script src="js/controllers/NotificationController.js"></script>
+  <script src="js/controllers/SearchController.js"></script>
+  <script src="js/controllers/ReportController.js"></script>
+  <script src="js/app.js"></script>
 </body>
 </html>

@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: taskproject-api
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python app.py
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: MONGO_URI
+        fromDatabase:
+          name: taskproject-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true

@@ -73,3 +73,28 @@ Para desarrollo con la API en otro puerto, edita `frontend/js/config.js` y cambi
 - **Base de datos:** MongoDB con espacio para tu URI en `.env`
 - **UX:** Toasts en lugar de `alert`, fila seleccionada resaltada, input tipo fecha, validaciones
 - **Código:** Módulos separados, eventos con `addEventListener`, sin `event` global en pestañas
+
+## 🚀 Despliegue en Producción
+
+### Backend (Render)
+El backend ya está configurado para desplegarse en Render usando el archivo `backend/render.yaml`.
+
+### Frontend (Vercel / Render)
+El frontend está listo para desplegarse en ambas plataformas:
+
+#### Para Vercel:
+1. Conecta tu repositorio en [vercel.com](https://vercel.com)
+2. Selecciona la carpeta `frontend` como directorio raíz
+3. Vercel detectará automáticamente la configuración
+
+#### Para Render:
+1. Ve a [render.com](https://render.com) > New > Static Site
+2. Configura:
+   - **Root Directory**: `frontend`
+   - **Build Command**: `echo "Build completed"`
+   - **Publish Directory**: `.`
+
+#### Script de despliegue:
+Ejecuta `frontend/deploy.bat` para un asistente interactivo de despliegue.
+
+Para más detalles, consulta [frontend/README.md](frontend/README.md)

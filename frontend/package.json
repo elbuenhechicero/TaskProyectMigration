@@ -1,0 +1,13 @@
+{
+  "name": "task-manager-frontend",
+  "version": "1.0.0",
+  "description": "Task Manager Frontend Application",
+  "main": "index.html",
+  "scripts": {
+    "start": "python -m http.server 3000",
+    "build": "echo Build completed - static site ready"
+  },
+  "keywords": ["task-manager", "frontend", "html", "css", "javascript"],
+  "author": "",
+  "license": "MIT"
+}

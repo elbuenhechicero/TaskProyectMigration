@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: task-manager-frontend
+    env: static
+    staticPublishPath: .
+    buildCommand: echo "Build completed - static site ready"
+    headers:
+      - path: /*
+        name: X-Frame-Options
+        value: DENY
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
